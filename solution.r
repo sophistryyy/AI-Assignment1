@@ -44,25 +44,20 @@ calculateNeighborsCost <- function(node, nodes, roads)
   neighbors = getNeighbors(node, nodes)
   
   for (neighbor in neighbors) {
-    if (!is.null(neighbor))
+    dx <- neighbor$x - x
+    dy <- neighbor$y - y
+    # Move horizontally so get the horizontal cost
+    if (abs(dx) == 1)
     {
-      dx <- neighbor$x - x
-      dy <- neighbor$y - y
-      # Move horizontally so get the horizontal cost
-      if (abs(dx) == 1)
-      {
-        hcost <- hroads[x + dx-1, y]
-        neighbor$g <- node$g + hcost
-      }
-      # Move vertically so get the vertical cost
-      else if (abs(dy) == 1)
-      {
-        vcost <- vroads[x, y + dy-1]
-        neighbor$g <- node$g + vcost
-      }
-      neighbor$f <- neighbor$g + neighbor$h
-      nodes[[neighbor$y]][[neighbor$x]] <- neighbor
+      neighbor$g <- node$g + hroads[x + dx-1, y]
     }
+    # Move vertically so get the vertical cost
+    else if (abs(dy) == 1)
+    {
+      neighbor$g <- node$g + vroads[x, y + dy-1]
+    }
+    neighbor$f <- neighbor$g + neighbor$h
+    nodes[[neighbor$y]][[neighbor$x]] <- neighbor
   }
   return (getNeighbors(node, nodes))
 }
@@ -73,10 +68,7 @@ getBestNode <- function(frontier, goal)
   bestF <- Inf
   for (node in frontier)
   {
-    if (length(node$f) == 0)
-    {
-      node$f = 0
-    }
+    if (length(node$f) == 0) node$f = 0
     if (node$f < bestF)
     {
       bestF <- node$f
