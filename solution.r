@@ -10,7 +10,7 @@ initializeNodes <- function(curPackage)
     row = list()
     for (x in 1:10)
     {
-      row[[x]] <- createNode(x, y, manhattanDistance(x, y, packx, packy))
+      row[[x]] <- list(x = x, y = y, f = 0, g = 0, h = manhattanDistance(x, y, packx, packy), parent = NULL)
       #print(row)
     }
     rows[[y]] <- row
@@ -18,51 +18,15 @@ initializeNodes <- function(curPackage)
   return (rows)
 }
 
-createNode <- function(xx, yy, hh)
-{
-  # Keep parent as just coordinates
-  return (list(x = xx, y = yy, f = 0, g = 0, h = hh, parent = NULL))
-}
-
 getNeighbors <- function(car, nodes)
 {
-  x = car$x
-  y = car$y
-  
-  # Get left neighbor
-  lnx = x - 1
-  lny = y
-  ln = NULL
-  if (lnx >= 1)
-  {
-    ln <- nodes[[lny]][[lnx]]
-  }
-  # Get upper neighbor
-  unx = x
-  uny = y + 1
-  un = NULL
-  if (uny <= 10)
-  {
-    un <- nodes[[uny]][[unx]]
-  }
-  # Get right neighbor
-  rnx = x+1
-  rny = y
-  rn = NULL;
-  if (rnx <= 10)
-  {
-    rn <- nodes[[rny]][[rnx]]
-  }
-  # Get below neighbor
-  dnx = x
-  dny = y-1
-  dn = NULL;
-  if (dny >= 1)
-  {
-    dn <- nodes[[dny]][[dnx]]
-  }
-  neighbors <- list(ln, un, rn, dn)
-  neighbors <- neighbors[lapply(neighbors, is.null) == FALSE]
+  neighbors <- list()
+  x <- car$x
+  y <- car$y
+  if (x-1 >= 1) neighbors[[length(neighbors)+1]] <- nodes[[y]][[x-1]]
+  if (x+1 <= 10) neighbors[[length(neighbors)+1]] <- nodes[[y]][[x+1]]
+  if (y-1 >= 1) neighbors[[length(neighbors)+1]] <- nodes[[y-1]][[x]]
+  if (y+1 <= 10) neighbors[[length(neighbors)+1]] <- nodes[[y+1]][[x]]
   return (neighbors)
 }
 
@@ -127,11 +91,6 @@ getBestNode <- function(frontier, goal)
   return (bestNode)
 }
 
-testBestNode <- function()
-{
-  
-}
-
 test <- function(roads, car, packages)
 {
   # Testing
@@ -143,6 +102,7 @@ test <- function(roads, car, packages)
   bestNode <- getBestNode(neighbors, list(x=5, y=7))
   neighbors <- calculateNeighborsCost(bestNode, nodes, roads)
   bestNode <- getBestNode(neighbors, list(x=5, y=7))
+  print(bestNode)
   return (car)
 }
 
