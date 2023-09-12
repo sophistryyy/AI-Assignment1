@@ -29,7 +29,6 @@ getNeighbors <- function(car, nodes)
   x = car$x
   y = car$y
   
-  
   # Get left neighbor
   lnx = x - 1
   lny = y
@@ -62,8 +61,9 @@ getNeighbors <- function(car, nodes)
   {
     dn <- nodes[[dny]][[dnx]]
   }
-  
-  return (list(ln, un, rn, dn))
+  neighbors <- list(ln, un, rn, dn)
+  neighbors <- neighbors[lapply(neighbors, is.null) == FALSE]
+  return (neighbors)
 }
 
 manhattanDistance <- function(x1, y1, x2, y2)
@@ -84,11 +84,13 @@ calculateNeighborsCost <- function(node, nodes, roads)
     {
       dx <- neighbor$x - x
       dy <- neighbor$y - y
+      # Move horizontally so get the horizontal cost
       if (abs(dx) == 1)
       {
         hcost <- hroads[x + dx-1, y]
         neighbor$g <- node$g + hcost
       }
+      # Move vertically so get the vertical cost
       else if (abs(dy) == 1)
       {
         vcost <- vroads[x, y + dy-1]
@@ -96,9 +98,9 @@ calculateNeighborsCost <- function(node, nodes, roads)
       }
       neighbor$f <- neighbor$g + neighbor$h
       nodes[[neighbor$y]][[neighbor$x]] <- neighbor
-      print(neighbor)
     }
   }
+  return (getNeighbors(node, nodes))
 }
 
 getBestNode <- function(frontier, goal)
@@ -107,6 +109,10 @@ getBestNode <- function(frontier, goal)
   bestF <- Inf
   for (node in frontier)
   {
+    if (length(node$f) == 0)
+    {
+      node$f = 0
+    }
     if (node$f < bestF)
     {
       bestF <- node$f
@@ -121,13 +127,22 @@ getBestNode <- function(frontier, goal)
   return (bestNode)
 }
 
+testBestNode <- function()
+{
+  
+}
+
 test <- function(roads, car, packages)
 {
   # Testing
   nodes <- initializeNodes(list(x = 5, y = 7))
-  neighbors <- getNeighbors(car, nodes)
   cx = car$x
   cy = car$y
   curNode <- nodes[[cy]][[cx]]
-  calculateNeighborsCost(curNode, nodes, roads)
+  neighbors <- calculateNeighborsCost(curNode, nodes, roads)
+  bestNode <- getBestNode(neighbors, list(x=5, y=7))
+  neighbors <- calculateNeighborsCost(bestNode, nodes, roads)
+  bestNode <- getBestNode(neighbors, list(x=5, y=7))
+  return (car)
 }
+
