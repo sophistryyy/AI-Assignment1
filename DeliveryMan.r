@@ -86,8 +86,8 @@ calculateNeighborsCost <- function(node, nodes, roads)
 {
   x = node$x
   y = node$y
-  hroads = roads$hroads# сначала строка потом столбез горизонтальной линии
-  vroads = roads$vroads# сначала столбец потом строка версикальной линии линии
+  hroads = roads$hroads
+  vroads = roads$vroads
   neighbors = getNeighbors(node, nodes)
   
   for (neighbor in neighbors) {
@@ -133,26 +133,20 @@ getBestNode <- function(frontier, goal)
       bestF <- node$f
       bestNode <- node
     }
-    # if (node$x == goal$x && node$y == goal$y)
-    # {
-    #   bestIndex<-i
-    #   bestNode <- goal
-    #   break
-    # }
   }
   return (bestIndex)
 }
 
 SetChecking <- function(set, x, y) {
   if (length(set) == 0) {
-    return (FALSE)
+    return (0)
   }
-  for (set_element in set) {
-    if (x == set_element$x && y == set_element$y) {
-      return (TRUE)
+  for (i in 1:length(set)) {
+    if (x == set[[i]]$x && y == set[[i]]$y) {
+      return (i)
     }
   }
-  return(FALSE)
+  return(0)
 }
 
 FindPath <- function(final_node, ClosedList) {
@@ -180,25 +174,29 @@ FindPath <- function(final_node, ClosedList) {
 }
 
 AstarAlgorithm = function(roads, car, packages,closest_packagex,closest_packagey){
-  nodes = initializeNodes(car$x, car$y)# Do  we need to initialize all nodes
+  nodes = initializeNodes(car$x, car$y)
   OpenList = list()
   ClosedList = list()
   current_index = 1
   current_x = car$x
   current_y = car$y
   current_Node <- nodes[[current_y]][[current_x]]
-  OpenList[[length(OpenList) + 1]] = nodes[[current_x]][[current_y]]
+  OpenList[[length(OpenList) + 1]] = nodes[[current_y]][[current_x]]
   while (TRUE) {
     neighbors <- calculateNeighborsCost(current_Node, nodes, roads)
     for (neighbor in neighbors) {
-      if (SetChecking(OpenList, neighbor$x, neighbor$y) == FALSE &&
-          SetChecking(ClosedList, neighbor$x, neighbor$y) == FALSE) {
+      isinOpenList=SetChecking(OpenList, neighbor$x, neighbor$y)
+      if (isinOpenList==0 &&
+          SetChecking(ClosedList, neighbor$x, neighbor$y) == 0) {
         neighbor$parent = list(x = current_x, y = current_y)
         OpenList[[length(OpenList) + 1]] = neighbor
       }
+      else if(isinOpenList!=0 && OpenList[[isinOpenList]]$f>neighbor$f){
+        neighbor$parent = list(x = current_x, y = current_y)
+        OpenList[[isinOpenList]] = neighbor
+      }
     }
     OpenList = OpenList[-current_index]
-    print(length(OpenList))
     current_index <- getBestNode(OpenList, list(x = current_x, y = current_y))
     ClosedList[[length(ClosedList) + 1]] <- current_Node
     current_x  = OpenList[[current_index]]$x
@@ -219,31 +217,29 @@ test <- function(roads, car, packages)
 {
   if (car$load == 0) {
     package_index = FindClosestPackage(car, packages)
+    if(all(c(car$x, car$y)==c(packages[package_index,1],packages[package_index,2]))){
+      car$nextMove=5
+      return (car)
+    }
     car=AstarAlgorithm(roads, car, packages, packages[package_index,1], packages[package_index,2])
     
   }
   else{
+    if(all(c(car$x, car$y)==c(packages[car$load,3], packages[car$load,4]))){
+      car$nextMove=5
+      return (car)
+    }
     car = AstarAlgorithm(roads, car, packages, packages[car$load,3], packages[car$load,4])
   }
   return (car)
   
 }
 nextMove = function(car, next_node) {
-  if (next_node$x == car$x + 1) {
-    next_move = 6
-  }
-  else if (next_node$x == car$x - 1) {
-    next_move = 4
-  }
-  else if (next_node$y == car$y + 1) {
-    next_move = 8
-  }
-  else if (next_node$y == car$y - 1 ) {
-    next_move = 2
-  }
-  else {
-    next_move = 5
-  }
+  if (next_node$x == car$x + 1) next_move = 6
+  else if (next_node$x == car$x - 1) next_move = 4
+  else if (next_node$y == car$y + 1) next_move = 8
+  else if (next_node$y == car$y - 1 ) next_move = 2
+  else next_move = 5
   return (next_move)
   
 }
