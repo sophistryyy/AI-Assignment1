@@ -87,6 +87,11 @@ astarAlg <- function(hroads, vroads, start, end) {
   while (length(open_list) > 0) {
     # find node with lowest f val
     current <- open_list[[which.min(sapply(open_list, function(cell) f_values[cell[1],cell[2]]))]]
+    print("start")
+    print(start)
+    print(end)
+    print("current")
+    print(current)
 
     # Check if equals end node
     if (current[1] == end[1] && current[2] == end[2]) {
@@ -98,28 +103,37 @@ astarAlg <- function(hroads, vroads, start, end) {
     
     # move current from open_list to closed_list
     open_list <- open_list[-which(names(open_list) == current)]
-    closed_list <- c(closed_list, current)
+    closed_list[[length(closed_list)+1]] <- current
     
     #initialize neighbors as empty
     neighbors <- list()
     
-    if (current[1] > 1) {neighbors[[length(neighbors)+1]] <- c(current[1] - 1, current[2])}
-    if (current[1] < nrow) {neighbors[[length(neighbors)+1]] <- c(current[1] + 1, current[2])}
-    if (current[2] > 1) {neighbors[[length(neighbors)+1]] <- c(current[1], current[2] - 1)}
-    if (current[2] < ncol) {neighbors[[length(neighbors)+1]] <- c(current[1], current[2] + 1)}
+    if (current[1] > 1) {neighbors[[length(neighbors)+1]] <- c(current[1] - 1, current[2])} #left 
+    if (current[1] < nrow) {neighbors[[length(neighbors)+1]] <- c(current[1] + 1, current[2])} #right
+    if (current[2] > 1) {neighbors[[length(neighbors)+1]] <- c(current[1], current[2] - 1)} #down
+    if (current[2] < ncol) {neighbors[[length(neighbors)+1]] <- c(current[1], current[2] + 1)} #up
     
     #iterate through neighbours
+    #TODO: make sure hroads and vroads are calibrated
     for (neighbor in neighbors) {
+      print(neighbor)
       #if neighbor not in closed_list
       if (!(any(closed_list %in% list(neighbor)))) {
+        print("neigbor not in closed list")
         if (neighbor[1] == current[1]) { #horizontal road
-          tentative_g <- g_values[current[1], current[2]] + hroads[neighbor[1], neighbor[2]]
+          tentative_g <- g_values[current[1], current[2]] + hroads[(neighbor[1]), neighbor[2]]
+          # print(hroads)
+          # print(hroads[neighbor[1], neighbor[2]])
         } else { #vertical road
-          tentative_g <- g_values[current[1], current[2]] + vroads[neighbor[1], neighbor[2]]
+          tentative_g <- g_values[current[1], current[2]] + vroads[neighbor[1], (neighbor[2])]
+          # print(vroads)
+          # print(vroads[neighbor[1],neighbor[2]])
         }
+        print(tentative_g)
         
-        #if neighbor not in the open list or has lower g
+        #if neighbor not in the open list or has lower g (update g then)
         if (!(any(open_list %in% list(neighbor))) || (tentative_g < g_values[neighbor[1], neighbor[2]])) {
+          "neighbor not in open list or g val is lower"
           parent[[length(parent)+1]] <- current
           g_values[neighbor[1],neighbor[2]] <- tentative_g
           f_values[neighbor[1], neighbor[2]] <- g_values[neighbor[1], neighbor[2]] + manhattan(neighbor, end)
