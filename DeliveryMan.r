@@ -1,15 +1,3 @@
-# Install the package
-install.packages("C://DeliveryMan_1.1.0.tar.gz",
-                 repos = NULL,
-                 type = "source")
-
-# Load the library
-library("DeliveryMan")
-
-# Read documentation
-# ?runDeliveryMan
-#?testDM
-
 Manhattan_Distance = function(x1, y1, x2, y2) {
   dist = abs(x1 - x2) + abs(y1 - y2)
   return (dist)
@@ -52,7 +40,7 @@ initializeNodes <- function(carx, cary)
           y = y,
           f = 0,
           g = 0,
-          h = manhattanDistance(x, y, carx, cary),
+          h = Manhattan_Distance(x, y, carx, cary),
           parent = list(x = 0, y = 0)
         )
     }
@@ -77,10 +65,6 @@ getNeighbors <- function(car, nodes)
   return (neighbors)
 }
 
-manhattanDistance <- function(x1, y1, x2, y2)
-{
-  return (abs(x2 - x1) + abs(y2 - y1))
-}
 
 calculateNeighborsCost <- function(node, nodes, roads)
 {
@@ -213,7 +197,7 @@ AstarAlgorithm = function(roads, car, packages,closest_packagex,closest_packagey
   }
 }
 
-test <- function(roads, car, packages)
+myFunction <- function(roads, car, packages)
 {
   if (car$load == 0) {
     package_index = FindClosestPackage(car, packages)
